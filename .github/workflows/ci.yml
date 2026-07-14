@@ -1,16 +1,27 @@
 name: orderbook-engine
 
 on:
-    push:
-        branches: [$default-branch]
-    pull_request:
-        branches: [$default-branch]
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
 
-            - name: install uv
-              uses: astral-sh/setup-uv@v5
+    - name: install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: "3.13"
+
+    - name: install dependencies
+      run: uv sync --all-extras --dev
+
+    - name: lint with ruff
+      run: uv run ruff check .
+
+    - name: run tests
+      run: uv run pytest --cov=orderbook --cov-report=term_missing
