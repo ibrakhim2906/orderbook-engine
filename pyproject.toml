@@ -1,0 +1,17 @@
+[project]
+name = "orderbook-engine"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "hypothesis>=6.156.6",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "sortedcontainers>=2.4.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.21",
+]
