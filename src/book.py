@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from sortedcontainers import SortedDict
 
-from src.models import Order, OrderStatus, Side, Trade
+from src.models import Order, OrderStatus, OrderType, Side, Trade
 
 
 class OrderBook:
@@ -76,12 +76,13 @@ class OrderBook:
             else:
                 best_price, level_orders = opposite_book.peekitem(-1)
 
-            if incoming.side == Side.BUY:
-                if incoming.price < best_price:
-                    break
-            elif incoming.side == Side.SELL:
-                if incoming.price > best_price:
-                    break
+            if incoming.order_type != OrderType.MARKET:
+                if incoming.side == Side.BUY:
+                    if incoming.price < best_price:
+                        break
+                elif incoming.side == Side.SELL:
+                    if incoming.price > best_price:
+                        break
 
             while level_orders and incoming.remaining_quantity > 0:
                 resting = level_orders[0]
@@ -119,7 +120,7 @@ class OrderBook:
             if not level_orders:
                 del opposite_book[best_price]
 
-        if incoming.remaining_quantity > 0:
+        if incoming.remaining_quantity > 0 and incoming.order_type != OrderType.MARKET:
             self._insert_resting(incoming)
 
         return trades
