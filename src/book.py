@@ -19,6 +19,18 @@ class OrderBook:
         order.sequence = self._next_sequence()
         return self._match(order)
 
+    def cancel_order(self, order_id: str) -> bool:
+
+        if order_id not in self.orders:
+            return False
+
+        if self.orders[order_id].status in (OrderStatus.FILLED, OrderStatus.CANCELLED):
+            return False
+
+        self.orders[order_id].status = OrderStatus.CANCELLED
+
+        return True
+
     def best_bid(self) -> Decimal | None:
 
         if not self.bids:
