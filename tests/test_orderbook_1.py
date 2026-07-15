@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from src.book import OrderBook
-from src.models import OrderStatus, Side
+from src.models import Side
 from tests.test_models import make_order
 
 
@@ -112,9 +112,8 @@ def test_cancelled_order_is_skipped():
         order_id="3", side=Side.BUY, price=Decimal("100"), quantity=Decimal("100")
     )
 
-    sell_a.status = OrderStatus.CANCELLED
-
     book.add_order(sell_a)
+    book.cancel_order(sell_a.order_id)
     book.add_order(sell_b)
 
     trades = book.add_order(buy)
