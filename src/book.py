@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from sortedcontainers import SortedDict
 
-from src.models import Order, OrderStatus, OrderType, Side, Trade
+from src.models import Order, OrderStatus, OrderType, Side, TimeInForce, Trade
 
 
 class OrderBook:
@@ -120,7 +120,11 @@ class OrderBook:
             if not level_orders:
                 del opposite_book[best_price]
 
-        if incoming.remaining_quantity > 0 and incoming.order_type != OrderType.MARKET:
+        if (
+            incoming.remaining_quantity > 0
+            and incoming.order_type != OrderType.MARKET
+            and incoming.time_in_force != TimeInForce.IOC
+        ):
             self._insert_resting(incoming)
 
         return trades
