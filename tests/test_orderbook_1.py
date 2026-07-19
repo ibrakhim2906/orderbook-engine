@@ -8,10 +8,18 @@ from tests.test_models import make_order
 def test_exact_match_full_fill():
     book = OrderBook("BTCUSD")
     sell = make_order(
-        order_id="1", side=Side.SELL, price=Decimal("100"), quantity=Decimal("100")
+        order_id="1",
+        owner_id="533",
+        side=Side.SELL,
+        price=Decimal("100"),
+        quantity=Decimal("100"),
     )
     buy = make_order(
-        order_id="2", side=Side.BUY, price=Decimal("100"), quantity=Decimal("100")
+        order_id="2",
+        owner_id="534",
+        side=Side.BUY,
+        price=Decimal("100"),
+        quantity=Decimal("100"),
     )
 
     book.add_order(sell)
@@ -30,10 +38,18 @@ def test_partial_fill_incoming_smaller():
 
     book = OrderBook(symbol="BTCUSD")
     sell = make_order(
-        order_id="1", side=Side.SELL, price=Decimal("100"), quantity=Decimal("10")
+        order_id="1",
+        owner_id="534",
+        side=Side.SELL,
+        price=Decimal("100"),
+        quantity=Decimal("10"),
     )
     buy = make_order(
-        order_id="2", side=Side.BUY, price=Decimal("100"), quantity=Decimal("5")
+        order_id="2",
+        owner_id="533",
+        side=Side.BUY,
+        price=Decimal("100"),
+        quantity=Decimal("5"),
     )
 
     book.add_order(sell)
@@ -50,14 +66,26 @@ def test_partial_fill_incoming_sweeps_two_levels():
 
     book = OrderBook("BTCUSD")
     sell_level1 = make_order(
-        order_id="1", side=Side.SELL, price=Decimal("100"), quantity=Decimal("10")
+        order_id="1",
+        owner_id="533",
+        side=Side.SELL,
+        price=Decimal("100"),
+        quantity=Decimal("10"),
     )
     sell_level2 = make_order(
-        order_id="2", side=Side.SELL, price=Decimal("101"), quantity=Decimal("5")
+        order_id="2",
+        owner_id="534",
+        side=Side.SELL,
+        price=Decimal("101"),
+        quantity=Decimal("5"),
     )
 
     buy = make_order(
-        order_id="3", side=Side.BUY, price=Decimal("101"), quantity=Decimal("15")
+        order_id="3",
+        owner_id="535",
+        side=Side.BUY,
+        price=Decimal("101"),
+        quantity=Decimal("15"),
     )
 
     book.add_order(sell_level1)
@@ -79,13 +107,25 @@ def test_fifo_tie_break_earlier_order_filled_first():
 
     book = OrderBook("BTCUSD")
     sell_a = make_order(
-        order_id="1", side=Side.SELL, price=Decimal("100"), quantity=Decimal("10")
+        order_id="1",
+        owner_id="533",
+        side=Side.SELL,
+        price=Decimal("100"),
+        quantity=Decimal("10"),
     )
     sell_b = make_order(
-        order_id="2", side=Side.SELL, price=Decimal("100"), quantity=Decimal("10")
+        order_id="2",
+        owner_id="534",
+        side=Side.SELL,
+        price=Decimal("100"),
+        quantity=Decimal("10"),
     )
     buy = make_order(
-        order_id="3", side=Side.BUY, price=Decimal("100"), quantity=Decimal("10")
+        order_id="3",
+        owner_id="535",
+        side=Side.BUY,
+        price=Decimal("100"),
+        quantity=Decimal("10"),
     )
 
     book.add_order(sell_a)
@@ -102,14 +142,26 @@ def test_cancelled_order_is_skipped():
 
     book = OrderBook("BTCUSD")
     sell_a = make_order(
-        order_id="1", side=Side.SELL, price=Decimal("100"), quantity=Decimal("100")
+        order_id="1",
+        owner_id="533",
+        side=Side.SELL,
+        price=Decimal("100"),
+        quantity=Decimal("100"),
     )
     sell_b = make_order(
-        order_id="2", side=Side.SELL, price=Decimal("100"), quantity=Decimal("100")
+        order_id="2",
+        owner_id="534",
+        side=Side.SELL,
+        price=Decimal("100"),
+        quantity=Decimal("100"),
     )
 
     buy = make_order(
-        order_id="3", side=Side.BUY, price=Decimal("100"), quantity=Decimal("100")
+        order_id="3",
+        owner_id="535",
+        side=Side.BUY,
+        price=Decimal("100"),
+        quantity=Decimal("100"),
     )
 
     book.add_order(sell_a)
@@ -127,10 +179,18 @@ def test_no_match_when_prices_dont_cross():
 
     book = OrderBook(symbol="BTCUSD")
     sell = make_order(
-        order_id="1", side=Side.SELL, price=Decimal("100"), quantity=Decimal("5")
+        order_id="1",
+        owner_id="533",
+        side=Side.SELL,
+        price=Decimal("100"),
+        quantity=Decimal("5"),
     )
     buy = make_order(
-        order_id="2", side=Side.BUY, price=Decimal("95"), quantity=Decimal("5")
+        order_id="2",
+        owner_id="534",
+        side=Side.BUY,
+        price=Decimal("95"),
+        quantity=Decimal("5"),
     )
 
     book.add_order(sell)

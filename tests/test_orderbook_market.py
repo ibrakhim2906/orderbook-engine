@@ -9,14 +9,23 @@ def test_market_buy_sweeps_multiple_levels():
 
     book = OrderBook("BTCUSD")
     sell_a = make_order(
-        order_id="1", side=Side.SELL, price=Decimal("100"), quantity=Decimal("100")
+        order_id="1",
+        owner_id="533",
+        side=Side.SELL,
+        price=Decimal("100"),
+        quantity=Decimal("100"),
     )
     sell_b = make_order(
-        order_id="2", side=Side.SELL, price=Decimal("100"), quantity=Decimal("100")
+        order_id="2",
+        owner_id="534",
+        side=Side.SELL,
+        price=Decimal("100"),
+        quantity=Decimal("100"),
     )
 
     market_buy = make_order(
         order_id="3",
+        owner_id="535",
         side=Side.BUY,
         order_type=OrderType.MARKET,
         price=None,
