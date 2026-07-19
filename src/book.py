@@ -97,6 +97,9 @@ class OrderBook:
                     level_orders.popleft()
                     continue
 
+                if resting.owner_id == incoming.owner_id:
+                    return trades
+
                 trade_qty = min(resting.remaining_quantity, incoming.remaining_quantity)
 
                 resting.remaining_quantity -= trade_qty
