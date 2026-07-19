@@ -17,6 +17,12 @@ class OrderBook:
 
     def add_order(self, order: Order) -> list[Trade]:
         order.sequence = self._next_sequence()
+
+        if order.time_in_force == TimeInForce.FOK:
+            if not self._can_fully_fill(order):
+                order.status = OrderStatus.REJECTED
+                return []
+
         return self._match(order)
 
     def cancel_order(self, order_id: str) -> bool:
@@ -128,3 +134,34 @@ class OrderBook:
             self._insert_resting(incoming)
 
         return trades
+
+    def _can_fully_fill(self, incoming: Order) -> bool:
+
+        opposite_book = self.bids if incoming.side == Side.SELL else self.asks
+
+        collected_quantity = Decimal("0")
+
+        prices = (
+            opposite_book.keys()
+            if opposite_book is self.asks
+            else reversed(opposite_book)
+        )
+
+        for price in prices:
+            if incoming.side == Side.BUY:
+                if incoming.price < price:
+                    break
+            elif incoming.side == Side.SELL:
+                if incoming.price > price:
+                    break
+
+            for order in opposite_book[price]:
+                if order.status == OrderStatus.CANCELLED:
+                    continue
+
+                collected_quantity += order.remaining_quantity
+
+                if collected_quantity >= incoming.quantity:
+                    return True
+
+        return False
