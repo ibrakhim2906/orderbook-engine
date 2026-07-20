@@ -25,6 +25,54 @@ class OrderBook:
 
         return self._match(order)
 
+    def amend_order(self, order_id: str, new_price=None, new_quantity=None) -> bool:
+
+        order = self.orders.get(order_id)
+
+        if not order:
+            return False
+
+        if order.status in (OrderStatus.FILLED, OrderStatus.CANCELLED):
+            return False
+
+        is_price_changed = new_price is not None and new_price != order.price
+        is_quality_increased = (
+            new_quantity is not None and new_quantity > order.quantity
+        )
+
+        if (
+            not is_price_changed
+            and not is_quality_increased
+            and new_quantity is not None
+        ):
+            already_filled = order.quantity - order.remaining_quantity
+
+            if already_filled > new_quantity:
+                return False
+
+            order.quantity = new_quantity
+            order.remaining_quantity = new_quantity - already_filled
+
+            return True
+
+        order.status = OrderStatus.CANCELLED
+
+        new_order = Order(
+            order_id=str(uuid.uuid4()),
+            owner_id=order.owner_id,
+            symbol=order.symbol,
+            side=order.side,
+            order_type=order.order_type,
+            time_in_force=order.time_in_force,
+            price=new_price if new_price is not None else order.price,
+            quantity=new_quantity if new_quantity is not None else order.quantity,
+            sequence=0,
+        )
+
+        self.add_order(new_order)
+
+        return True
+
     def cancel_order(self, order_id: str) -> bool:
 
         if order_id not in self.orders:
