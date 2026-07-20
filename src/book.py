@@ -101,6 +101,35 @@ class OrderBook:
         price, _ = self.asks.peekitem(0)
         return price  # type: ignore
 
+    def depth(self, levels: int) -> dict:
+
+        return {
+            "bids": self._side_depth(self.bids, levels, reverse=True),
+            "asks": self._side_depth(self.asks, levels, reverse=False),
+        }
+
+    def _side_depth(
+        self, book_side: SortedDict, levels: int, reverse: bool
+    ) -> list[tuple]:
+
+        result = []
+
+        prices = reversed(book_side.keys()) if reverse else book_side.keys()
+
+        for price in prices:
+            if len(result) >= levels:
+                break
+
+            total = Decimal("0")
+
+            for order in book_side[price]:
+                if order.status != OrderStatus.CANCELLED:
+                    total += order.remaining_quantity
+
+                result.append((price, total))
+
+        return result
+
     def _insert_resting(self, order: Order) -> None:
 
         self.orders[order.order_id] = order
