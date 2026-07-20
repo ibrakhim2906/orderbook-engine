@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from src.book import OrderBook
 from src.models import Side
-from tests.test_models import make_order
+from tests.conftest import make_order
 
 
 def test_amending_price_loses_priority():

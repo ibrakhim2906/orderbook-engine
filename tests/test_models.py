@@ -3,23 +3,8 @@ from decimal import Decimal
 
 import pytest
 
-from src.models import Order, OrderStatus, OrderType, Side, TimeInForce, Trade
-
-
-def make_order(**overrides):
-    defaults = dict(
-        order_id="1",
-        owner_id="trader_1",
-        symbol="BTCUSD",
-        side=Side.BUY,
-        order_type=OrderType.LIMIT,
-        time_in_force=TimeInForce.GTC,
-        price=Decimal("100"),
-        quantity=Decimal("50"),
-        sequence=0,
-    )
-    defaults.update(overrides)
-    return Order(**defaults)
+from src.models import OrderStatus, OrderType, Trade
+from tests.conftest import make_order
 
 
 def test_order_defaults_remaining_quantity_to_quantity():
