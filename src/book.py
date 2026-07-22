@@ -126,7 +126,7 @@ class OrderBook:
                 if order.status != OrderStatus.CANCELLED:
                     total += order.remaining_quantity
 
-                result.append((price, total))
+            result.append((price, total))
 
         return result
 
@@ -177,7 +177,7 @@ class OrderBook:
                 if resting.owner_id == incoming.owner_id:
                     if incoming.remaining_quantity == incoming.quantity:
                         incoming.status = OrderStatus.REJECTED
-                    else:
+                    elif incoming.remaining_quantity < incoming.quantity:
                         incoming.status = OrderStatus.PARTIALLY_FILLED
 
                     return trades
@@ -210,6 +210,20 @@ class OrderBook:
 
             if not level_orders:
                 del opposite_book[best_price]
+
+        if incoming.remaining_quantity == 0:
+            incoming.status = OrderStatus.FILLED
+        elif incoming.remaining_quantity < incoming.quantity:
+            incoming.status = OrderStatus.PARTIALLY_FILLED
+
+        if (
+            incoming.remaining_quantity > 0
+            and incoming.order_type != OrderType.MARKET
+            and incoming.time_in_force != TimeInForce.IOC
+        ):
+            self._insert_resting(incoming)
+
+        return trades
 
         if (
             incoming.remaining_quantity > 0
