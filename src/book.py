@@ -175,6 +175,11 @@ class OrderBook:
                     continue
 
                 if resting.owner_id == incoming.owner_id:
+                    if incoming.remaining_quantity == incoming.quantity:
+                        incoming.status = OrderStatus.REJECTED
+                    else:
+                        incoming.status = OrderStatus.PARTIALLY_FILLED
+
                     return trades
 
                 trade_qty = min(resting.remaining_quantity, incoming.remaining_quantity)
