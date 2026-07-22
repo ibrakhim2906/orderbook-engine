@@ -37,7 +37,7 @@ class MatchingEngine:
             time_in_force=time_in_force,
             price=price,
             quantity=quantity,
-            sequence=0,  # placeholder, overwritten inside OrderBook.add_order
+            sequence=0,
         )
 
         book = self.get_book(symbol)

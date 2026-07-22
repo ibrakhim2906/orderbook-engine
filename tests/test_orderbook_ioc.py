@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from src.book import OrderBook
 from src.models import Side, TimeInForce
-from tests.test_models import make_order
+from tests.conftest import make_order
 
 
 def test_ico_timeinforce_order_remaining_amount_do_not_rest():
