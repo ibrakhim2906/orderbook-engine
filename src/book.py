@@ -25,35 +25,37 @@ class OrderBook:
 
         return self._match(order)
 
-    def amend_order(self, order_id: str, new_price=None, new_quantity=None) -> bool:
+    def amend_order(
+        self, order_id: str, new_price=None, new_quantity=None
+    ) -> tuple[bool, list[Trade]]:
 
         order = self.orders.get(order_id)
 
         if not order:
-            return False
+            return False, []
 
         if order.status in (OrderStatus.FILLED, OrderStatus.CANCELLED):
-            return False
+            return False, []
 
         is_price_changed = new_price is not None and new_price != order.price
-        is_quality_increased = (
+        is_quantity_increased = (
             new_quantity is not None and new_quantity > order.quantity
         )
 
         if (
             not is_price_changed
-            and not is_quality_increased
+            and not is_quantity_increased
             and new_quantity is not None
         ):
             already_filled = order.quantity - order.remaining_quantity
 
             if already_filled > new_quantity:
-                return False
+                return False, []
 
             order.quantity = new_quantity
             order.remaining_quantity = new_quantity - already_filled
 
-            return True
+            return True, []
 
         order.status = OrderStatus.CANCELLED
 
@@ -69,9 +71,9 @@ class OrderBook:
             sequence=0,
         )
 
-        self.add_order(new_order)
+        trades = self.add_order(new_order)  # correct here — self is the OrderBook
 
-        return True
+        return True, trades
 
     def cancel_order(self, order_id: str) -> bool:
 
@@ -215,15 +217,6 @@ class OrderBook:
             incoming.status = OrderStatus.FILLED
         elif incoming.remaining_quantity < incoming.quantity:
             incoming.status = OrderStatus.PARTIALLY_FILLED
-
-        if (
-            incoming.remaining_quantity > 0
-            and incoming.order_type != OrderType.MARKET
-            and incoming.time_in_force != TimeInForce.IOC
-        ):
-            self._insert_resting(incoming)
-
-        return trades
 
         if (
             incoming.remaining_quantity > 0

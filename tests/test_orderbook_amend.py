@@ -94,6 +94,7 @@ def test_cannot_amend_cancelled_or_filled_order():
     book.add_order(sell)
     book.add_order(buy)
 
-    is_changed = book.amend_order(order_id="1", new_price=Decimal("200"))
+    success, trades = book.amend_order(order_id="1", new_price=Decimal("200"))
 
-    assert not is_changed
+    assert not success
+    assert trades == []
