@@ -28,8 +28,8 @@ class OrderBook:
     def amend_order(
         self,
         order_id: str,
-        new_price=None,
-        new_quantity=None,
+        new_price: Decimal | None = None,
+        new_quantity: Decimal | None = None,
         new_order_id: str | None = None,
     ) -> tuple[bool, list[Trade], str | None]:
 
@@ -40,6 +40,8 @@ class OrderBook:
 
         if order.status in (OrderStatus.FILLED, OrderStatus.CANCELLED):
             return False, [], None
+
+        assert order.remaining_quantity is not None
 
         is_price_changed = new_price is not None and new_price != order.price
         is_quantity_increased = (
@@ -118,7 +120,7 @@ class OrderBook:
         self, book_side: SortedDict, levels: int, reverse: bool
     ) -> list[tuple]:
 
-        result = []
+        result: list[tuple[Decimal, Decimal]] = []
 
         prices = reversed(book_side.keys()) if reverse else book_side.keys()
 
@@ -155,6 +157,8 @@ class OrderBook:
     def _match(self, incoming: Order) -> list[Trade]:
         trades: list[Trade] = []
 
+        assert incoming.remaining_quantity is not None
+
         opposite_book = self.asks if incoming.side == Side.BUY else self.bids
 
         while (
@@ -166,6 +170,8 @@ class OrderBook:
                 best_price, level_orders = opposite_book.peekitem(-1)
 
             if incoming.order_type != OrderType.MARKET:
+                assert incoming.price is not None
+
                 if incoming.side == Side.BUY:
                     if incoming.price < best_price:
                         break
