@@ -1,12 +1,17 @@
+import os
 import random
 import statistics
+import tempfile
 import timeit
 from decimal import Decimal
 
 from src.engine import MatchingEngine
+from src.eventlog import EventLog
 from src.models import OrderType, Side
 
 SEED = 67
+
+USE_DB = False
 
 
 def create_random_order_batch(
@@ -40,8 +45,19 @@ def load_batch(engine: MatchingEngine, orders: list[dict]) -> None:
 def make_trial_fn(orders: list[dict]):
 
     def trial():
-        engine = MatchingEngine()
-        load_batch(engine, orders)
+        if USE_DB:
+            fd, path = tempfile.mkstemp(suffix=".db")
+            os.close(fd)
+            try:
+                event_log = EventLog(path)
+                engine = MatchingEngine(event_log=event_log)
+                load_batch(engine, orders)
+                event_log.close()
+            finally:
+                os.remove(path)
+        else:
+            engine = MatchingEngine(event_log=None)
+            load_batch(engine, orders)
 
     return trial
 
@@ -59,7 +75,8 @@ def benchmark(
     time_median = statistics.median(results)
     throughput = n / time_median
 
-    print(f"\n--- {name} ---")
+    eventlog_active = "[with EventLog]" if USE_DB else "[no EventLog]"
+    print(f"\n--- {name} --- ", eventlog_active)
     print(f"Orders: {n}, trials: {trials}")
     print(f"Seed given: {SEED}")
     print(f"All trial times: {[f'{t:.4f}s' for t in results]}")

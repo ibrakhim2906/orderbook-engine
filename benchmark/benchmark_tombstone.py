@@ -1,13 +1,18 @@
+import os
 import random
 import statistics
+import tempfile
 import timeit
 from decimal import Decimal
 
 from benchmark.benchmark_submit import SEED
 from src.engine import MatchingEngine
+from src.eventlog import EventLog
 from src.models import OrderStatus, OrderType, Side
 
 CANCEL_PROBABILITY = 0.33
+
+USE_DB = False
 
 
 def create_cancel_heavy_plan(
@@ -67,9 +72,19 @@ def run_plan(engine: MatchingEngine, plan: list[tuple]) -> tuple[int, int]:
 def make_trial_fn(plan):
 
     def trial():
-
-        engine = MatchingEngine()
-        run_plan(engine, plan)
+        if USE_DB:
+            fd, path = tempfile.mkstemp(suffix=".db")
+            os.close(fd)
+            try:
+                event_log = EventLog(path)
+                engine = MatchingEngine(event_log=event_log)
+                run_plan(engine, plan)
+                event_log.close()
+            finally:
+                os.remove(path)
+        else:
+            engine = MatchingEngine(event_log=None)
+            run_plan(engine, plan)
 
     return trial
 
@@ -113,7 +128,8 @@ def benchmark(
     submit_count, cancel_count = run_plan(diag_engine, plan)
     live, tombstones = count_tombstones_in_book(diag_engine, "BTCUSD")
 
-    print(f"\n--- {name} ---")
+    eventlog_active = "[with EventLog]" if USE_DB else "[no EventLog]"
+    print(f"\n--- {name} ---", eventlog_active)
     print(f"Orders: {n}, trials: {trials}")
     print(f"All trial times: {[f'{t:.4f}s' for t in results]}")
     print(f"Median time: {time_median:.4f}s")
