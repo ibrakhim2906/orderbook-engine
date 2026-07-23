@@ -4,10 +4,6 @@ A FIFO (price-time priority) order book matching engine built from scratch in Py
 
 The engine offers limit and market orders, GTC/IOC/FOK time-in-force, order cancelation, amendment with correct rules, self-trade prevention, and durable event logging with full state replay ability. Careful testing include 39 unit/integration tests plus property-based test that helped to indicate four significant semantical bugs during development.
 
-<img width="724" height="267" alt="Screenshot 2026-07-23 at 15 21 37" src="https://github.com/user-attachments/assets/96c34ab7-ddfe-46ab-8dda-3565a85a54c8" />
-
-<img width="685" height="269" alt="Screenshot 2026-07-23 at 15 21 48" src="https://github.com/user-attachments/assets/7125ecdc-be49-4c11-a913-820962422c3e" />
-
 ## What it can do
 
 - **price-time priority matching** -- orders at the best price filled first, while among same price levels, whoever order arrived first is being filled first.
