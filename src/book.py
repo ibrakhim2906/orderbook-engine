@@ -26,16 +26,20 @@ class OrderBook:
         return self._match(order)
 
     def amend_order(
-        self, order_id: str, new_price=None, new_quantity=None
-    ) -> tuple[bool, list[Trade]]:
+        self,
+        order_id: str,
+        new_price=None,
+        new_quantity=None,
+        new_order_id: str | None = None,
+    ) -> tuple[bool, list[Trade], str | None]:
 
         order = self.orders.get(order_id)
 
         if not order:
-            return False, []
+            return False, [], None
 
         if order.status in (OrderStatus.FILLED, OrderStatus.CANCELLED):
-            return False, []
+            return False, [], None
 
         is_price_changed = new_price is not None and new_price != order.price
         is_quantity_increased = (
@@ -50,17 +54,17 @@ class OrderBook:
             already_filled = order.quantity - order.remaining_quantity
 
             if already_filled > new_quantity:
-                return False, []
+                return False, [], None
 
             order.quantity = new_quantity
             order.remaining_quantity = new_quantity - already_filled
 
-            return True, []
+            return True, [], order.order_id
 
         order.status = OrderStatus.CANCELLED
 
         new_order = Order(
-            order_id=str(uuid.uuid4()),
+            order_id=new_order_id if new_order_id is not None else str(uuid.uuid4()),
             owner_id=order.owner_id,
             symbol=order.symbol,
             side=order.side,
@@ -73,7 +77,7 @@ class OrderBook:
 
         trades = self.add_order(new_order)  # correct here — self is the OrderBook
 
-        return True, trades
+        return True, trades, new_order.order_id
 
     def cancel_order(self, order_id: str) -> bool:
 
