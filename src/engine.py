@@ -23,6 +23,7 @@ class MatchingEngine:
         price: Decimal | None = None,
         time_in_force: TimeInForce = TimeInForce.GTC,
     ) -> tuple[Order, list[Trade]]:
+
         if order_type == OrderType.LIMIT and price is None:
             raise ValueError("LIMIT orders require a price")
         if order_type == OrderType.MARKET and price is not None:
