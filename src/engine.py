@@ -123,3 +123,46 @@ class MatchingEngine:
     def register_trade_callback(self, fn: Callable[[Trade], None]) -> None:
 
         self._on_trade_callbacks.append(fn)
+
+    def replay_from(self, event_log: EventLog) -> None:
+
+        for _sequence, event_type, payload in event_log.read_all():
+            if event_type == EventType.OrderSubmitted.value:
+                self.submit_order(
+                    owner_id=payload["owner_id"],
+                    symbol=payload["symbol"],
+                    side=Side(payload["side"]),
+                    order_type=OrderType(payload["order_type"]),
+                    quantity=Decimal(payload["quantity"]),
+                    price=(
+                        Decimal(payload["price"])
+                        if payload["price"] is not None
+                        else None
+                    ),
+                    time_in_force=TimeInForce(payload["time_in_force"]),
+                    order_id=payload["order_id"],
+                )
+
+            elif event_type == EventType.OrderCancelled.value:
+                self.cancel_order(payload["symbol"], payload["order_id"])
+
+            elif event_type == EventType.OrderAmended.value:
+                new_price = (
+                    Decimal(payload["new_price"])
+                    if payload["new_price"] is not None
+                    else None
+                )
+
+                new_quantity = (
+                    Decimal(payload["new_quantity"])
+                    if payload["new_quantity"] is not None
+                    else None
+                )
+
+                self.amend_order(
+                    payload["symbol"],
+                    payload["order_id"],
+                    new_price,
+                    new_quantity,
+                    new_order_id=payload.get("resulting_order_id"),
+                )
